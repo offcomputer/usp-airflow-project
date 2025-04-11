@@ -1,0 +1,103 @@
+# This is a basic experimental setup for development purpose only
+
+services:
+  postgres:
+    image: postgres:bookworm
+    env_file:
+      - dev.env
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U airflow"]
+      interval: 5s
+      retries: 5
+
+  redis:
+    image: redis:bookworm
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      retries: 5
+
+  airflow-init:
+    image: apache/airflow:latest-python3.11
+    env_file:
+      - dev.env
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    command:
+      - bash
+      - -c
+      - |
+        set -e
+        airflow db migrate
+        airflow users create --username admin --password admin --firstname Admin --lastname User --role Admin --email admin@example.com
+    volumes:
+      - airflow-volume:/opt/airflow
+    restart: "no"
+
+  airflow-webserver:
+    image: apache/airflow:latest-python3.11
+    env_file:
+      - dev.env
+    depends_on:
+      airflow-init:
+        condition: service_completed_successfully
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    command: webserver
+    ports:
+      - "8080:8080"
+    volumes:
+      - airflow-volume:/opt/airflow
+
+  airflow-scheduler:
+    image: apache/airflow:latest-python3.11
+    env_file:
+      - dev.env
+    depends_on:
+      airflow-init:
+        condition: service_completed_successfully
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    command: scheduler
+    volumes:
+      - airflow-volume:/opt/airflow
+
+  airflow-worker:
+    image: apache/airflow:latest-python3.11
+    env_file:
+      - dev.env
+    depends_on:
+      airflow-init:
+        condition: service_completed_successfully
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    command: celery worker
+    volumes:
+      - airflow-volume:/opt/airflow
+
+  jupyter:
+    image: jupyter/minimal-notebook:latest
+    env_file:
+      - dev.env
+    ports:
+      - "8888:8888"
+    volumes:
+      - airflow-volume:/opt/airflow
+    command: start-notebook.sh --NotebookApp.token=''
+
+volumes:
+  postgres-data:
+  airflow-volume:
