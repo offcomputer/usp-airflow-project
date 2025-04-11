@@ -14,15 +14,19 @@
 │   │   ├── control
 │   │   │   ├── __init__.py
 │   │   ├── etl
+│   │   │   ├── extract.py
 │   │   │   ├── __init__.py
+│   │   │   ├── load.py
+│   │   │   ├── transform.py
 │   │   ├── __init__.py
 │   │   ├── services
 │   │   │   ├── __init__.py
-│   ├── etl.py
+│   │   ├── tasks.py
+│   ├── etl_dag.py
 │   ├── notebooks
 │   │   ├── logs.ipynb
 │   │   ├── results.ipynb
-│   ├── sample.py
+│   ├── sample_dag.py
 ├── utils
 │   ├── repo_structure.sh
 ```
