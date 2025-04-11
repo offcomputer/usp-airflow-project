@@ -57,6 +57,7 @@ services:
       - "8080:8080"
     volumes:
       - airflow-volume:/opt/airflow
+      - ./src:/opt/airflow/dags
 
   airflow-scheduler:
     image: apache/airflow:latest-python3.11
@@ -72,6 +73,7 @@ services:
     command: scheduler
     volumes:
       - airflow-volume:/opt/airflow
+      - ./src:/opt/airflow/dags
 
   airflow-worker:
     image: apache/airflow:latest-python3.11
@@ -87,6 +89,7 @@ services:
     command: celery worker
     volumes:
       - airflow-volume:/opt/airflow
+      - ./src:/opt/airflow/dags
 
   jupyter:
     image: jupyter/minimal-notebook:latest
@@ -95,7 +98,7 @@ services:
     ports:
       - "8888:8888"
     volumes:
-      - airflow-volume:/opt/airflow
+      - airflow-volume:/home/jovyan/airflow
     command: start-notebook.sh --NotebookApp.token=''
 
 volumes:
