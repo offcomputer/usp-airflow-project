@@ -1,0 +1,12 @@
+{
+    "execution_simulation": {
+        "external_services": {
+            "min_seconds": 1.0,
+            "max_seconds": 3.0
+        },
+        "internal_services": {
+            "min_seconds": 0.2,
+            "max_seconds": 1.0
+        }
+    }
+}
