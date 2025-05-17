@@ -1,4 +1,4 @@
-from app.patterns.etl.extract import ExtractorPattern
+from patterns.etl.extract import ExtractorPattern
 
 class Extractor(ExtractorPattern):
     """

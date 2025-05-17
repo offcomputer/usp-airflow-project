@@ -1,4 +1,4 @@
-from app.patterns.services.message_broker import MessageBrokerPattern
+from patterns.services.message_broker import MessageBrokerPattern
 
 class MessageBroker(MessageBrokerPattern):
     """

@@ -1,4 +1,4 @@
-from app.patterns.etl.load import LoaderPattern
+from patterns.etl.load import LoaderPattern
 
 class Loader(LoaderPattern):
     """

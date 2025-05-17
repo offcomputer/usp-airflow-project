@@ -1,4 +1,4 @@
-from app.patterns.etl.transform import TransformerPattern
+from patterns.etl.transform import TransformerPattern
 
 class Transformer(TransformerPattern):
     """

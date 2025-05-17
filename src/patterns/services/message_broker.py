@@ -6,12 +6,6 @@ class MessageBrokerPattern(ABC):
     Abstract base class for message brokers. Further methods must be 
     implemented here, before to apply in the subclasses.
     """
-
-    def __init__(self, client: Any) -> None:
-        """
-        Initialize the message broker with a client.
-        """
-        self.client = client
     
     @abstractmethod
     def publish(self) -> None:
