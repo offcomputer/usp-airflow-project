@@ -1,5 +1,4 @@
 from abc import ABC, abstractmethod
-from typing import Any
 
 class DataSinkPattern(ABC):
     """
@@ -8,7 +7,7 @@ class DataSinkPattern(ABC):
     """
     
     @abstractmethod
-    def load_to_sink(self) -> Any:
+    def load_to_sink(self) -> None:
         """
         Load data to the sink.
         """
