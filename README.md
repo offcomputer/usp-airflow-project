@@ -8,22 +8,23 @@
 ├── LICENSE
 ├── README.md
 ├── src
-│   ├── app_sample
-│   │   ├── dags
-│   │   │   ├── dag_sample.py
-│   ├── app_template
-│   │   ├── config
-│   │   │   ├── app_settings.json
-│   │   ├── dags
-│   │   │   ├── dag_template.py
-│   │   ├── etl
-│   │   │   ├── extract.py
-│   │   │   ├── __init__.py
-│   │   │   ├── load.py
-│   │   │   ├── transform.py
-│   │   ├── tasks
-│   │   │   ├── __init__.py
-│   │   │   ├── tasks.py
+│   ├── apps
+│   │   ├── sample
+│   │   │   ├── dags
+│   │   │   │   ├── dag_sample.py
+│   │   ├── template
+│   │   │   ├── config
+│   │   │   │   ├── app_settings.json
+│   │   │   ├── dags
+│   │   │   │   ├── dag_template.py
+│   │   │   ├── etl
+│   │   │   │   ├── extract.py
+│   │   │   │   ├── __init__.py
+│   │   │   │   ├── load.py
+│   │   │   │   ├── transform.py
+│   │   │   ├── tasks
+│   │   │   │   ├── __init__.py
+│   │   │   │   ├── tasks.py
 │   ├── library
 │   │   ├── helpers.py
 │   │   ├── __init__.py
