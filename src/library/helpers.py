@@ -22,7 +22,8 @@ def open_json_file(file_path: str) -> dict:
 
 def simulate_service_time(service_type: str) -> None:
     """
-    Simulate a service call.
+    Simulate a service call. Service type can be 'external_services' 
+    or 'internal_services'.
     """
     settings = open_json_file(JSON_FILE_PATH)['execution_simulation']
     min_seconds = settings[service_type]['min_seconds']

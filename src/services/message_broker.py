@@ -1,4 +1,5 @@
 from patterns.services.message_broker import MessageBrokerPattern
+import app_template.control.helpers as helpers
 
 class MessageBroker(MessageBrokerPattern):
     """
@@ -10,22 +11,10 @@ class MessageBroker(MessageBrokerPattern):
         """
         Publish a message to the broker.
         """
-        pass
+        helpers.simulate_service_time('internal_services')
 
     def consume(self) -> None:
         """
         Consume a message from the broker.
         """
-        pass
-
-    def acknowledge(self) -> None:
-        """
-        Acknowledge a message in the broker.
-        """
-        pass
-
-    def delete(self) -> None:
-        """
-        Delete a message from the broker.
-        """
-        pass
+        helpers.simulate_service_time('internal_services')

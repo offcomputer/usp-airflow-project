@@ -20,17 +20,3 @@ class MessageBrokerPattern(ABC):
         Consume a message from the broker.
         """
         ...
-
-    @abstractmethod
-    def acknowledge(self) -> None:
-        """
-        Acknowledge a message in the broker.
-        """
-        ...
-
-    @abstractmethod
-    def delete(self, *args, **kwargs) -> None:
-        """
-        Delete a message from the broker.
-        """
-        ...
