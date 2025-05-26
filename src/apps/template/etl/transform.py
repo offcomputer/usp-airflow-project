@@ -1,5 +1,6 @@
 from patterns.etl.transform import TransformerPattern
 import services.message_broker as message_broker
+import library.helpers as helpers
 
 class Transformer(TransformerPattern):
     """
@@ -19,6 +20,12 @@ class Transformer(TransformerPattern):
         Simulate the consumption of data from a message broker.
         """
         self.broker.consume()
+    
+    def transform_data(self):
+        """
+        Simulate the transformation of data.
+        """
+        helpers.simulate_service_time('transformations')
     
     def publish_to_broker(self):
         """

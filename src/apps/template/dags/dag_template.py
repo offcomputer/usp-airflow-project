@@ -1,11 +1,12 @@
 from airflow import DAG
 from airflow.operators.python import PythonOperator
 from airflow.utils.task_group import TaskGroup
-from airflow.models import Variable
 from datetime import datetime
-import json
 import library.helpers as helpers
+import apps.template.tasks.etl_tasks as tasks
 
+# The balancing between operators can be set 
+# at "http://localhost:8080/variable/list/"
 helpers.create_config_variable(
     var_name="app_template_config",
     data={
@@ -14,12 +15,8 @@ helpers.create_config_variable(
         "loaders": 1
     }
 )
+# Load the configuration variable from Airflow Variables
 CONFIG = helpers.get_variable("app_template_config")
-
-def dummy_task(task_name):
-    def _task():
-        print(f"Running {task_name}")
-    return _task
 
 with DAG(
     dag_id="app_template",
@@ -33,19 +30,19 @@ with DAG(
         for i in range(CONFIG.get("extractors")):
             PythonOperator(
                 task_id=f"extract_{i+1}",
-                python_callable=dummy_task(f"extract_{i}"),
+                python_callable=tasks.extract,
             )
 
     with TaskGroup("transformers") as transform_group:
         for i in range(CONFIG.get("transformers")):
             PythonOperator(
                 task_id=f"transform_{i+1}",
-                python_callable=dummy_task(f"transform_{i}"),
+                python_callable=tasks.transform,
             )
 
     with TaskGroup("loaders") as load_group:
         for i in range(CONFIG.get("loaders")):
             PythonOperator(
                 task_id=f"load_{i+1}",
-                python_callable=dummy_task(f"load_{i}"),
+                python_callable=tasks.load,
             )

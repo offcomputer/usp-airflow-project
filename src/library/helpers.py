@@ -3,7 +3,7 @@ import time
 import json
 from airflow.models import Variable
 
-JSON_FILE_PATH = "/opt/airflow/dags/app_template/config/app_settings.json"
+JSON_FILE_PATH = "/opt/airflow/dags/apps/template/config/app_settings.json"
 
 def random_sleep(min_seconds: float, max_seconds: float) -> None:
     """
@@ -20,6 +20,14 @@ def open_json_file(file_path: str) -> dict:
     with open(file_path, 'r') as file:
         data = json.load(file)
     return data
+
+def get_n_batches() -> int:
+    """
+    Get the number of batches to process from the JSON 
+    configuration file.
+    """
+    settings = open_json_file(JSON_FILE_PATH)
+    return settings['batches']
 
 def simulate_service_time(service_type: str) -> None:
     """
