@@ -1,7 +1,7 @@
 from patterns.services.data_source import DataSourcePattern
-import app_template.control.helpers as helpers
+import library.helpers as helpers
 
-class DataSink(DataSourcePattern):
+class DataSource(DataSourcePattern):
     """
     DataSource class that extends the DataSourcePattern.
     This class is responsible for extracting data from the source.

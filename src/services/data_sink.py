@@ -1,5 +1,5 @@
 from patterns.services.data_sink import DataSinkPattern
-import app_template.control.helpers as helpers
+import library.helpers as helpers
 
 class DataSink(DataSinkPattern):
     """

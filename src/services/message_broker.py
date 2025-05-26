@@ -1,5 +1,5 @@
 from patterns.services.message_broker import MessageBrokerPattern
-import app_template.control.helpers as helpers
+import library.helpers as helpers
 
 class MessageBroker(MessageBrokerPattern):
     """
