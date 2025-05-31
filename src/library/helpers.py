@@ -95,5 +95,5 @@ def get_log(n: int, n_task_batches: int, time_spent: float):
     """
     Log the counter and the time spent on the task.
     """
-    logger.info(f'{n}:{n_task_batches}:{time_spent}')
+    logger.info(f'{n} {n_task_batches} {time_spent}')
 
