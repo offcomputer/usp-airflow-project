@@ -2,6 +2,8 @@ import random
 import time
 import json
 from airflow.models import Variable
+from airflow.utils.log.logging_mixin import LoggingMixin
+logger = LoggingMixin().log
 
 JSON_FILE_PATH = "/opt/airflow/dags/apps/template/config/app_settings.json"
 
@@ -66,3 +68,32 @@ def create_config_variable(var_name: str, data: dict[str, int]) -> None:
     if parsed_data:
         return
     set_variable(var_name, data)
+
+def start_delta_seconds() -> float:
+    """
+    Returns the current time in seconds as a float.
+    """
+    return time.time()
+
+def stop_delta_seconds(start: float) -> float:
+    """
+    Returns the elapsed time in seconds as a float (rounded to milliseconds).
+    """
+    end = time.time()
+    return round(end - start, 3)
+
+def batches(task_type: str):
+    n_batches = get_n_batches()
+    config = get_variable("app_template_config")
+    n_tasks = config.get(task_type, 1)
+    n_task_batches = n_batches // n_tasks
+    for n in range(n_task_batches):
+        n += 1
+        yield n, n_task_batches
+
+def get_log(n: int, n_task_batches: int, time_spent: float):
+    """
+    Log the counter and the time spent on the task.
+    """
+    logger.info(f'{n}:{n_task_batches}:{time_spent}')
+
