@@ -13,5 +13,5 @@
             "max_seconds": 3.0
         }
     },
-    "batches": 1000
+    "batches": 125
 }

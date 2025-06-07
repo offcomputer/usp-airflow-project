@@ -69,6 +69,12 @@ def create_config_variable(var_name: str, data: dict[str, int]) -> None:
         return
     set_variable(var_name, data)
 
+def update_config_variable(var_name: str, data: dict[str, int]) -> None:
+    """
+    Update an Airflow Variable to a string value.
+    """
+    set_variable(var_name, data)
+
 def start_delta_seconds() -> float:
     """
     Returns the current time in seconds as a float.
@@ -95,5 +101,11 @@ def get_log(n: int, n_task_batches: int, time_spent: float):
     """
     Log the counter and the time spent on the task.
     """
-    logger.info(f'{n} {n_task_batches} {time_spent}')
+    config = get_variable("app_template_config")
+    n_extractors = config.get("extractors", 1)
+    n_transformers = config.get("transformers", 1)
+    n_loaders = config.get("loaders", 1)
+    run_type = f'{n_extractors}-{n_transformers}-{n_loaders}'
+    completion = round((n / n_task_batches) * 100, 2)
+    logger.info(f'{run_type} {n} {completion} {time_spent}')
 

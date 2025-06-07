@@ -2,8 +2,14 @@ from airflow import DAG
 from airflow.operators.python import PythonOperator
 from airflow.utils.task_group import TaskGroup
 from datetime import datetime
+from itertools import product
 import library.helpers as helpers
 import apps.template.tasks.etl_tasks as tasks
+
+def get_combinations(start: int = 1, end: int = 6) -> list[list[int]]:
+    combinations = list(product(range(start, end), repeat=3))  # 1-5, 3 positions
+    combinations = [list(tup) for tup in combinations]
+    return combinations
 
 # The balancing between operators can be set 
 # at "http://localhost:8080/variable/list/"
@@ -12,7 +18,8 @@ helpers.create_config_variable(
     data={
         "extractors": 1,
         "transformers": 1,
-        "loaders": 1
+        "loaders": 1,
+        "task_distribution": get_combinations()
     }
 )
 # Load the configuration variable from Airflow Variables
