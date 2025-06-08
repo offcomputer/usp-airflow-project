@@ -99,6 +99,7 @@ services:
       - "8888:8888"
     volumes:
       - airflow-volume:/home/jovyan/airflow
+      - ./tmp:/home/jovyan/tmp
     command: start-notebook.sh --NotebookApp.token=''
 
 volumes:
