@@ -30,6 +30,7 @@
 │   ├── library
 │   │   ├── helpers.py
 │   │   ├── __init__.py
+│   │   ├── run_template.py
 │   ├── notebooks
 │   │   ├── logs.ipynb
 │   │   ├── results.ipynb
@@ -50,6 +51,9 @@
 │   │   ├── data_source.py
 │   │   ├── __init__.py
 │   │   ├── message_broker.py
+├── tmp
+│   ├── logs.csv
 ├── utils
 │   ├── repo_structure.sh
+│   ├── tmp_permission.sh
 ```
