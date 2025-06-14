@@ -7,6 +7,12 @@ import library.helpers as helpers
 import apps.template.tasks.etl_tasks as tasks
 
 def get_combinations(start: int = 1, end: int = 6) -> list[list[int]]:
+    """
+    Generate all combinations of integers from start to end (exclusive) 
+    for 3 positions.
+    For example, if start=1 and end=6, it generates combinations like:
+    [[1, 1, 1], [1, 1, 2], ..., [5, 5, 5]].
+    """
     combinations = list(product(range(start, end), repeat=3))  # 1-5, 3 positions
     combinations = [list(tup) for tup in combinations]
     return combinations
