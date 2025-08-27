@@ -52,12 +52,15 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
+      fix-permissions:
+        condition: service_completed_successfully
     command: webserver
     ports:
       - "8080:8080"
     volumes:
       - airflow-volume:/opt/airflow
       - ./src:/opt/airflow/dags
+      - ./tmp:/opt/airflow/logs
 
   airflow-scheduler:
     image: apache/airflow:latest-python3.11
@@ -70,10 +73,13 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
+      fix-permissions:
+        condition: service_completed_successfully
     command: scheduler
     volumes:
       - airflow-volume:/opt/airflow
       - ./src:/opt/airflow/dags
+      - ./tmp:/opt/airflow/logs
 
   airflow-worker:
     image: apache/airflow:latest-python3.11
@@ -86,21 +92,33 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
+      fix-permissions:
+        condition: service_completed_successfully
     command: celery worker
     volumes:
       - airflow-volume:/opt/airflow
       - ./src:/opt/airflow/dags
+      - ./tmp:/opt/airflow/logs
 
   jupyter:
     image: jupyter/minimal-notebook:latest
     env_file:
       - dev.env
+    depends_on:
+      fix-permissions:
+        condition: service_completed_successfully
     ports:
       - "8888:8888"
     volumes:
       - airflow-volume:/home/jovyan/airflow
       - ./tmp:/home/jovyan/tmp
     command: start-notebook.sh --NotebookApp.token=''
+
+  fix-permissions:
+    image: alpine:3.19
+    volumes:
+      - ./tmp:/shared-tmp
+    command: ["sh", "-c", "chmod -R 777 /shared-tmp"]
 
 volumes:
   postgres-data:
