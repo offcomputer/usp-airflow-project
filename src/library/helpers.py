@@ -2,7 +2,7 @@ import json
 import random
 import time
 from typing import Any, Dict
-
+from itertools import product
 from airflow.models import Variable
 from airflow.utils.session import create_session
 from sqlalchemy.exc import IntegrityError
@@ -12,6 +12,18 @@ logger = LoggingMixin().log
 
 JSON_FILE_PATH = "/opt/airflow/dags/apps/template/config/app_settings.json"
 
+
+def get_combinations(
+        start: int = 1, end: int = 6, repeat: int = 3) -> list[list[int]]:
+    """
+    Generate all combinations of integers from start to end (exclusive) 
+    for 3 positions.
+    For example, if start=1 and end=6, it generates combinations like:
+    [[1, 1, 1], [1, 1, 2], ..., [5, 5, 5]].
+    """
+    combinations = list(product(range(start, end), repeat=repeat))
+    combinations = [list(tup) for tup in combinations]
+    return combinations
 
 def random_sleep(min_seconds: float, max_seconds: float) -> None:
     """
@@ -37,6 +49,19 @@ def get_n_batches() -> int:
     settings = open_json_file(JSON_FILE_PATH)
     return settings["batches"]
 
+def get_n_dags() -> int:
+    """
+    Get the number of DAGs to process from the JSON configuration file.
+    """
+    settings = open_json_file(JSON_FILE_PATH)
+    return settings["n_dags"]
+
+def get_etl_variable() -> dict:
+    """
+    Get the ETL configuration variables from the JSON configuration file.
+    """
+    settings = open_json_file(JSON_FILE_PATH)
+    return settings["config_variable"]
 
 def simulate_service_time(service_type: str) -> None:
     """

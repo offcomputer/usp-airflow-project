@@ -13,5 +13,11 @@
             "max_seconds": 3.0
         }
     },
-    "batches": 125
+    "batches": 125,
+    "n_dags": 10,
+    "config_variable": {
+        "extractors": 1,
+        "transformers": 1,
+        "loaders": 1
+    }
 }
