@@ -33,14 +33,12 @@ def random_sleep(min_seconds: float, max_seconds: float) -> None:
     """
     time.sleep(random.uniform(min_seconds, max_seconds))
 
-
 def open_json_file(file_path: str) -> dict:
     """
     Open a JSON file and return its contents as a dictionary.
     """
     with open(file_path, "r") as f:
         return json.load(f)
-
 
 def get_n_batches() -> int:
     """
@@ -74,7 +72,6 @@ def simulate_service_time(service_type: str) -> None:
     max_seconds = settings[service_type]["max_seconds"]
     random_sleep(min_seconds, max_seconds)
 
-
 def get_variable(var_name: str) -> Dict[str, Any]:
     """Reads an Airflow Variable (JSON) safely; returns {} if missing/invalid."""
     try:
@@ -82,7 +79,6 @@ def get_variable(var_name: str) -> Dict[str, Any]:
     except Exception as e:
         logger.warning("get_variable(%s) failed: %s", var_name, e)
         return {}
-
 
 def _set_variable_with_retry(var_name: str, data: Dict[str, Any], retries: int = 8) -> None:
     """
@@ -106,7 +102,6 @@ def _set_variable_with_retry(var_name: str, data: Dict[str, Any], retries: int =
     if last_err:
         raise last_err
 
-
 def create_config_variable(var_name: str, data: Dict[str, Any]) -> None:
     """Create if missing; no-op if exists. Safe under concurrency."""
     current = get_variable(var_name)
@@ -114,16 +109,13 @@ def create_config_variable(var_name: str, data: Dict[str, Any]) -> None:
         return
     _set_variable_with_retry(var_name, data)
 
-
 def update_config_variable(var_name: str, data: Dict[str, Any]) -> None:
     """Create-or-update with retry; safe under concurrency."""
     _set_variable_with_retry(var_name, data)
 
-
 def set_variable(var_name: str, data: Dict[str, Any]) -> None:
     """Backwards-compat convenience: always safe set."""
     _set_variable_with_retry(var_name, data)
-
 
 def start_delta_seconds() -> float:
     """
@@ -131,37 +123,39 @@ def start_delta_seconds() -> float:
     """
     return time.time()
 
-
 def stop_delta_seconds(start: float) -> float:
     """
     Returns the elapsed time in seconds as a float (rounded to milliseconds).
     """
     return round(time.time() - start, 3)
 
-
 def batches(task_type: str):
     n_batches = get_n_batches()
-    config = get_variable("app_template_config")
+    n_extractors, n_transformers, n_loaders = get_etl_distribution()
+    config = {
+        "extractors": n_extractors,
+        "transformers": n_transformers,
+        "loaders": n_loaders,
+    }
     n_tasks = config.get(task_type, 1)
     n_task_batches = n_batches // n_tasks if n_tasks else 0
     for n in range(n_task_batches):
         yield n + 1, n_task_batches
 
+def get_etl_distribution():
+    ctx = get_current_context()
+    dag_run = ctx["dag_run"]
+    var = dag_run.conf.get("var")
+    config_value = Variable.get(var)
+    n_extractors, n_transformers, n_loaders = map(int, config_value.split("-"))
+    return n_extractors, n_transformers, n_loaders
 
 def get_log(n: int, n_task_batches: int, time_spent: float):
     """
     Log the counter and the time spent on the task.
     Uses the current DAG run's conf/Variable to determine run_type.
     """
-    ctx = get_current_context()
-    dag_run = ctx["dag_run"]
-
-    # "var" is passed in conf by your runner
-    var = dag_run.conf.get("var")
-    config_value = Variable.get(var)  # e.g. "2-3-5"
-    n_extractors, n_transformers, n_loaders = map(int, config_value.split("-"))
-
+    n_extractors, n_transformers, n_loaders = get_etl_distribution()
     run_type = f"{n_extractors}-{n_transformers}-{n_loaders}"
     completion = round((n / max(n_task_batches, 1)) * 100, 2)
-
     logger.info("%s %s %s %s", run_type, n, completion, time_spent)
