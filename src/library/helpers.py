@@ -7,6 +7,7 @@ from airflow.models import Variable
 from airflow.utils.session import create_session
 from sqlalchemy.exc import IntegrityError
 from airflow.utils.log.logging_mixin import LoggingMixin
+from airflow.operators.python import get_current_context
 
 logger = LoggingMixin().log
 
@@ -150,11 +151,17 @@ def batches(task_type: str):
 def get_log(n: int, n_task_batches: int, time_spent: float):
     """
     Log the counter and the time spent on the task.
+    Uses the current DAG run's conf/Variable to determine run_type.
     """
-    config = get_variable("app_template_config")
-    n_extractors = config.get("extractors", 1)
-    n_transformers = config.get("transformers", 1)
-    n_loaders = config.get("loaders", 1)
+    ctx = get_current_context()
+    dag_run = ctx["dag_run"]
+
+    # "var" is passed in conf by your runner
+    var = dag_run.conf.get("var")
+    config_value = Variable.get(var)  # e.g. "2-3-5"
+    n_extractors, n_transformers, n_loaders = map(int, config_value.split("-"))
+
     run_type = f"{n_extractors}-{n_transformers}-{n_loaders}"
     completion = round((n / max(n_task_batches, 1)) * 100, 2)
+
     logger.info("%s %s %s %s", run_type, n, completion, time_spent)
