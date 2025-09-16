@@ -1,3 +1,16 @@
+"""
+Sample Airflow DAG.
+
+This DAG is provided as a simple example to demonstrate the structure of
+an Apache Airflow workflow. It defines a single task that prints a
+message to the logs when executed.
+
+Typical usage example:
+
+    $ airflow dags list
+    $ airflow dags trigger hello_world_dag
+"""
+
 from airflow import DAG
 from airflow.operators.python import PythonOperator
 from datetime import datetime, timedelta

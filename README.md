@@ -1,4 +1,4 @@
-# usp-airflow-project
+## Repo Structure
 
 ```
 ├── .
@@ -18,6 +18,7 @@
 │   │   │   │   ├── app_settings.json
 │   │   │   ├── dags
 │   │   │   │   ├── dag_template.py
+│   │   │   │   ├── run_dags.py
 │   │   │   ├── etl
 │   │   │   │   ├── extract.py
 │   │   │   │   ├── __init__.py
@@ -51,8 +52,6 @@
 │   │   ├── data_source.py
 │   │   ├── __init__.py
 │   │   ├── message_broker.py
-├── tmp
-│   ├── logs.csv
 ├── utils
 │   ├── repo_structure.sh
 │   ├── tmp_permission.sh

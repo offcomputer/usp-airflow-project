@@ -1,3 +1,16 @@
+"""
+Run all template DAGs sequentially.
+
+This module defines a single Airflow DAG that triggers the execution of
+the run_template helper script for each configured template DAG. The
+tasks are created dynamically based on the number of DAGs specified by
+helpers.get_n_dags() and are chained sequentially, so each template is
+executed only after the previous one has finished.
+
+Typical usage example:
+    airflow dags trigger run_all_templates
+"""
+
 from airflow import DAG
 from airflow.operators.bash import BashOperator
 from datetime import datetime

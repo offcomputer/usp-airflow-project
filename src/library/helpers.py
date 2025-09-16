@@ -1,3 +1,15 @@
+"""
+Helper functions for ETL template DAGs.
+
+This module provides utility functions for working with template-based
+ETL pipelines in Airflow. It includes configuration management through
+Airflow Variables and JSON files, simulation of service delays,
+concurrency-safe variable updates, and helpers for batching and logging.
+
+Attributes:
+    JSON_FILE_PATH: Path to the JSON configuration file with settings.
+"""
+
 import json
 import random
 import time
@@ -14,76 +26,117 @@ logger = LoggingMixin().log
 JSON_FILE_PATH = "/opt/airflow/dags/apps/template/config/app_settings.json"
 
 
-def get_combinations(
-        start: int = 1, end: int = 6, repeat: int = 3) -> list[list[int]]:
-    """
-    Generate all combinations of integers from start to end (exclusive) 
-    for 3 positions.
-    For example, if start=1 and end=6, it generates combinations like:
-    [[1, 1, 1], [1, 1, 2], ..., [5, 5, 5]].
+def get_combinations(start: int = 1, end: int = 6, repeat: int = 3) -> list[list[int]]:
+    """Generates all combinations of integers within a range.
+
+    Args:
+        start: Inclusive start of the range.
+        end: Exclusive end of the range.
+        repeat: Number of positions to fill.
+
+    Returns:
+        A list of integer lists with all possible combinations.
+
+    Example:
+        get_combinations(1, 3, 2) → [[1, 1], [1, 2], [2, 1], [2, 2]]
     """
     combinations = list(product(range(start, end), repeat=repeat))
-    combinations = [list(tup) for tup in combinations]
-    return combinations
+    return [list(tup) for tup in combinations]
+
 
 def random_sleep(min_seconds: float, max_seconds: float) -> None:
-    """
-    Sleep for a random amount of time between min_seconds and 
-    max_seconds (inclusive).
+    """Sleeps for a random duration.
+
+    Args:
+        min_seconds: Minimum number of seconds.
+        max_seconds: Maximum number of seconds.
     """
     time.sleep(random.uniform(min_seconds, max_seconds))
 
+
 def open_json_file(file_path: str) -> dict:
-    """
-    Open a JSON file and return its contents as a dictionary.
+    """Opens a JSON file.
+
+    Args:
+        file_path: Path to the JSON file.
+
+    Returns:
+        The file contents as a dictionary.
     """
     with open(file_path, "r") as f:
         return json.load(f)
 
+
 def get_n_batches() -> int:
-    """
-    Get the number of batches to process from the JSON 
-    configuration file.
+    """Gets the number of batches from the JSON configuration.
+
+    Returns:
+        The number of batches defined in the config file.
     """
     settings = open_json_file(JSON_FILE_PATH)
     return settings["batches"]
 
+
 def get_n_dags() -> int:
-    """
-    Get the number of DAGs to process from the JSON configuration file.
+    """Gets the number of DAGs from the JSON configuration.
+
+    Returns:
+        The number of DAGs defined in the config file.
     """
     settings = open_json_file(JSON_FILE_PATH)
     return settings["n_dags"]
 
+
 def get_etl_variable() -> dict:
-    """
-    Get the ETL configuration variables from the JSON configuration file.
+    """Gets the ETL configuration variables from the JSON configuration.
+
+    Returns:
+        The ETL configuration section of the config file.
     """
     settings = open_json_file(JSON_FILE_PATH)
     return settings["config_variable"]
 
+
 def simulate_service_time(service_type: str) -> None:
-    """
-    Simulate a service call. Service type can be 'external_services' 
-    or 'internal_services'.
+    """Simulates a service call with randomized duration.
+
+    Args:
+        service_type: Either "external_services" or "internal_services".
     """
     settings = open_json_file(JSON_FILE_PATH)["execution_simulation"]
     min_seconds = settings[service_type]["min_seconds"]
     max_seconds = settings[service_type]["max_seconds"]
     random_sleep(min_seconds, max_seconds)
 
+
 def get_variable(var_name: str) -> Dict[str, Any]:
-    """Reads an Airflow Variable (JSON) safely; returns {} if missing/invalid."""
+    """Reads an Airflow Variable safely.
+
+    Args:
+        var_name: The name of the Airflow Variable.
+
+    Returns:
+        The parsed JSON value of the variable, or {} if missing or invalid.
+    """
     try:
         return Variable.get(var_name, default_var={}, deserialize_json=True)
     except Exception as e:
         logger.warning("get_variable(%s) failed: %s", var_name, e)
         return {}
 
+
 def _set_variable_with_retry(var_name: str, data: Dict[str, Any], retries: int = 8) -> None:
-    """
-    Concurrency-safe setter that relies on Variable.set (handles update-or-insert).
-    We just retry on IntegrityError races.
+    """Concurrency-safe setter for Airflow Variables.
+
+    Retries on IntegrityError to handle parallel insert/update races.
+
+    Args:
+        var_name: The name of the Airflow Variable.
+        data: The value to set, serialized as JSON.
+        retries: Number of retry attempts.
+
+    Raises:
+        Exception: If all retries fail.
     """
     last_err = None
     for _ in range(retries):
@@ -94,7 +147,6 @@ def _set_variable_with_retry(var_name: str, data: Dict[str, Any], retries: int =
             return
         except IntegrityError as e:
             last_err = e
-            # Another parallel writer inserted the row — jitter, then retry.
             time.sleep(0.1 + random.random() * 0.2)
         except Exception as e:
             last_err = e
@@ -102,34 +154,70 @@ def _set_variable_with_retry(var_name: str, data: Dict[str, Any], retries: int =
     if last_err:
         raise last_err
 
+
 def create_config_variable(var_name: str, data: Dict[str, Any]) -> None:
-    """Create if missing; no-op if exists. Safe under concurrency."""
+    """Creates a variable if missing; safe under concurrency.
+
+    Args:
+        var_name: The name of the variable.
+        data: The JSON-serializable data to store.
+    """
     current = get_variable(var_name)
     if current:
         return
     _set_variable_with_retry(var_name, data)
 
+
 def update_config_variable(var_name: str, data: Dict[str, Any]) -> None:
-    """Create-or-update with retry; safe under concurrency."""
+    """Creates or updates a variable with retry.
+
+    Args:
+        var_name: The name of the variable.
+        data: The JSON-serializable data to store.
+    """
     _set_variable_with_retry(var_name, data)
+
 
 def set_variable(var_name: str, data: Dict[str, Any]) -> None:
-    """Backwards-compat convenience: always safe set."""
+    """Always sets a variable safely.
+
+    Args:
+        var_name: The name of the variable.
+        data: The JSON-serializable data to store.
+    """
     _set_variable_with_retry(var_name, data)
 
+
 def start_delta_seconds() -> float:
-    """
-    Returns the current time in seconds as a float.
+    """Gets the current time in seconds.
+
+    Returns:
+        The current time as a float.
     """
     return time.time()
 
+
 def stop_delta_seconds(start: float) -> float:
-    """
-    Returns the elapsed time in seconds as a float (rounded to milliseconds).
+    """Computes elapsed time since a start timestamp.
+
+    Args:
+        start: Start time in seconds.
+
+    Returns:
+        Elapsed time in seconds, rounded to milliseconds.
     """
     return round(time.time() - start, 3)
 
+
 def batches(task_type: str):
+    """Yields batch numbers for a task type.
+
+    Args:
+        task_type: One of "extractors", "transformers", or "loaders".
+
+    Yields:
+        Tuples of (batch_number, total_batches) for the given task type.
+    """
     n_batches = get_n_batches()
     n_extractors, n_transformers, n_loaders = get_etl_distribution()
     config = {
@@ -142,7 +230,13 @@ def batches(task_type: str):
     for n in range(n_task_batches):
         yield n + 1, n_task_batches
 
+
 def get_etl_distribution():
+    """Parses ETL distribution counts from DAG run configuration.
+
+    Returns:
+        A tuple (n_extractors, n_transformers, n_loaders).
+    """
     ctx = get_current_context()
     dag_run = ctx["dag_run"]
     var = dag_run.conf.get("var")
@@ -150,10 +244,16 @@ def get_etl_distribution():
     n_extractors, n_transformers, n_loaders = map(int, config_value.split("-"))
     return n_extractors, n_transformers, n_loaders
 
+
 def get_log(n: int, n_task_batches: int, time_spent: float):
-    """
-    Log the counter and the time spent on the task.
-    Uses the current DAG run's conf/Variable to determine run_type.
+    """Logs task completion progress.
+
+    Uses DAG run conf/Variable to determine run_type.
+
+    Args:
+        n: Current batch number.
+        n_task_batches: Total number of batches.
+        time_spent: Time spent on the task in seconds.
     """
     n_extractors, n_transformers, n_loaders = get_etl_distribution()
     run_type = f"{n_extractors}-{n_transformers}-{n_loaders}"

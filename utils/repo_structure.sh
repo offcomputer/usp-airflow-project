@@ -11,7 +11,8 @@ cd "$ROOT" || exit 1
 
 echo '```'
 
-find . -path ./.git -prune -o -print | sort | while read -r line; do
+# Skip both .git and tmp folders
+find . \( -path ./.git -o -path ./tmp \) -prune -o -print | sort | while read -r line; do
   depth=$(echo "$line" | grep -o "/" | wc -l)
   indent=""
   if [ "$depth" -gt 1 ]; then
