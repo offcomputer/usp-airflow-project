@@ -106,6 +106,7 @@ These steps allow someone who clones the repository to run the environment local
 ```
 ├── compose.yml
 ├── dev.env
+├── .gitattributes
 ├── .gitignore
 ├── LICENSE
 ├── README.md
