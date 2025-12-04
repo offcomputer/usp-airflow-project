@@ -1,0 +1,25 @@
+x-qdrant-env: &qdrant-env
+  QDRANT_HTTP_PORT: ${QDRANT_HTTP_PORT:-6333}
+  QDRANT_GRPC_PORT: ${QDRANT_GRPC_PORT:-6334}
+  QDRANT_HOST_IP: ${QDRANT_HOST_IP:-localhost}
+
+x-qdrant-common: &qdrant-common
+  image: qdrant/qdrant:latest
+  environment:
+    <<: *qdrant-env
+  ports:
+    - "${QDRANT_HTTP_PORT:-6333}:6333"
+    - "${QDRANT_GRPC_PORT:-6334}:6334"
+  volumes:
+    - qdrant_data:/qdrant/storage
+  healthcheck:
+    test: ["CMD-SHELL", "bash -c '</dev/tcp/$${QDRANT_HOST_IP:-localhost}/6333' || exit 1"]
+    interval: 30s
+    timeout: 5s
+    retries: 5
+  restart: unless-stopped
+
+services:
+
+  qdrant:
+    <<: *qdrant-common

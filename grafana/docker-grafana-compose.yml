@@ -1,0 +1,40 @@
+x-grafana-common: &grafana-common
+  image: grafana/grafana:latest
+  restart: unless-stopped
+  environment:
+    GF_SECURITY_ADMIN_USER: ${GF_SECURITY_ADMIN_USER:-admin}
+    GF_SECURITY_ADMIN_PASSWORD: ${GF_SECURITY_ADMIN_PASSWORD:-admin}
+    GF_PORT: ${GF_PORT:-3000}
+  ports:
+    - "${GF_PORT:-3000}:3000"
+  volumes:
+    - ./provisioning:/etc/grafana/provisioning
+    - ./dashboards:/var/lib/grafana/dashboards
+
+services:
+
+  grafana-server:
+    <<: *grafana-common
+
+
+  promtail:
+    image: grafana/promtail:latest
+    restart: unless-stopped
+    command: -config.file=/etc/promtail/promtail-config.yml
+    volumes:
+      - /var/log:/var/log
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - promtail_data:/run/promtail
+      - ./promtail-config.yml:/etc/promtail/promtail-config.yml:ro
+      - airflow_logs:/opt/airflow/logs:ro
+
+  loki-server:
+    image: grafana/loki:latest
+    restart: unless-stopped
+    command: -config.file=/etc/loki/config/loki-config.yml
+    ports:
+      - "${LOKI_PORT:-3100}:3100"
+    volumes:
+      - ./loki-config.yml:/etc/loki/config/loki-config.yml:ro
+      - loki_data:/loki

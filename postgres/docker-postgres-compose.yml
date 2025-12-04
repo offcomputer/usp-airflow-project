@@ -1,0 +1,28 @@
+x-postgres-env: &postgres-env
+  POSTGRES_USER: ${POSTGRES_USER:-airflow}
+  POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-airflow}
+  POSTGRES_DB: ${POSTGRES_DB:-airflow}
+  POSTGRES_AIRFLOW_SHARED_BUFFERS: ${POSTGRES_AIRFLOW_SHARED_BUFFERS:-256MB}
+  POSTGRES_AIRFLOW_MAX_CONNECTIONS: ${POSTGRES_AIRFLOW_MAX_CONNECTIONS:-100}
+  POSTGRES_AIRFLOW_EFFECTIVE_CACHE_SIZE: ${POSTGRES_AIRFLOW_EFFECTIVE_CACHE_SIZE:-1GB}
+  POSTGRES_AIRFLOW_MAINTENANCE_WORK_MEM: ${POSTGRES_AIRFLOW_MAINTENANCE_WORK_MEM:-64MB}
+  POSTGRES_EXPORTER_USER: ${POSTGRES_EXPORTER_USER:-pgmon}
+  POSTGRES_EXPORTER_PASSWORD: ${POSTGRES_EXPORTER_PASSWORD:-pgmon}
+x-postgres-common: &postgres-common
+  image: postgres:latest
+  environment:
+    <<: *postgres-env
+  volumes:
+    - postgres_data:/var/lib/postgresql
+    - ./init:/docker-entrypoint-initdb.d
+  healthcheck:
+    test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-airflow}"]
+    interval: 5s
+    timeout: 5s
+    retries: 6
+  restart: unless-stopped
+
+services:
+
+  postgres:
+    <<: *postgres-common

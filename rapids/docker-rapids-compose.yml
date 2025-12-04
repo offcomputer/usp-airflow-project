@@ -1,0 +1,47 @@
+x-rapids-env: &rapids-env
+  RAPIDS_JUPYTER_PORT: ${RAPIDS_JUPYTER_PORT:-8888}
+  AIRFLOW_PROJ_DIR: ${AIRFLOW_PROJ_DIR:-../../airflow-infrastructure}
+  AIRFLOW_UID: ${AIRFLOW_UID:-1000}
+  NB_UID: ${AIRFLOW_UID:-1000}
+
+x-rapids-common: &rapids-common
+  image: rapids-notebooks-custom:latest
+  build:
+    context: .
+  environment:
+    <<: *rapids-env
+    NVIDIA_VISIBLE_DEVICES: ${NVIDIA_VISIBLE_DEVICES:-all}
+    NVIDIA_DRIVER_CAPABILITIES: ${NVIDIA_DRIVER_CAPABILITIES:-compute,utility}
+    NUMBA_CUDA_USE_NVIDIA_BINDING: ${NUMBA_CUDA_USE_NVIDIA_BINDING:-0}
+    # MLFLOW_TRACKING_URI: http://mlflow-server:5000
+  command: >
+    jupyter lab
+    --ip=0.0.0.0
+    --port=${RAPIDS_JUPYTER_PORT:-8888}
+    --notebook-dir=/home/rapids/notebooks
+    --allow-root
+    --NotebookApp.token=""
+    --NotebookApp.password=""
+  deploy:
+    resources:
+      reservations:
+        devices:
+          - driver: nvidia
+            count: all
+            capabilities: [gpu]
+  ports:
+    - "${RAPIDS_JUPYTER_PORT:-8888}:8888"
+  expose:
+    - 8888
+  working_dir: /home/rapids/notebooks
+  user: "0:0"
+  volumes:
+    - ${AIRFLOW_PROJ_DIR:-../../airflow-infrastructure}/src:/home/rapids/notebooks
+    - ${AIRFLOW_PROJ_DIR:-../../airflow-infrastructure}/_tmp:/tmp
+    - shared_data:/home/rapids/shared_data
+  restart: unless-stopped
+
+services:
+
+  rapids-notebook:
+    <<: *rapids-common

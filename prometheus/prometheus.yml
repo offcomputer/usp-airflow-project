@@ -1,0 +1,41 @@
+global:
+  scrape_interval: 15s
+
+scrape_configs:
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['prometheus-server:9090']
+
+  - job_name: 'grafana'
+    static_configs:
+      - targets: ['grafana-server:3000']
+
+  - job_name: 'airflow-statsd'
+    static_configs:
+      - targets: ['prometheus-statsd:9102']
+
+  - job_name: 'postgres'
+    static_configs:
+      - targets: ['postgres-exporter:9187']
+
+  - job_name: 'minio-cluster'
+    metrics_path: /minio/v2/metrics/cluster
+    static_configs:
+      - targets: ['minio-server:9000']
+
+  - job_name: 'minio-node'
+    metrics_path: /minio/v2/metrics/node
+    static_configs:
+      - targets: ['minio-server:9000']
+
+  - job_name: 'redis-airflow'
+    static_configs:
+      - targets: ['redis-airflow-exporter:9121']
+
+  - job_name: 'redis-app'
+    static_configs:
+      - targets: ['redis-app-exporter:9121']
+
+  - job_name: 'qdrant'
+    static_configs:
+      - targets: ['qdrant:6333']
