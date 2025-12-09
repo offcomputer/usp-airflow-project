@@ -1,6 +1,6 @@
 x-rapids-env: &rapids-env
   RAPIDS_JUPYTER_PORT: ${RAPIDS_JUPYTER_PORT:-8888}
-  AIRFLOW_PROJ_DIR: ${AIRFLOW_PROJ_DIR:-../../airflow-infrastructure}
+  AIRFLOW_PROJ_DIR: ${AIRFLOW_PROJ_DIR:-../../usp-airflow-project}
   AIRFLOW_UID: ${AIRFLOW_UID:-1000}
   NB_UID: ${AIRFLOW_UID:-1000}
 
@@ -36,8 +36,8 @@ x-rapids-common: &rapids-common
   working_dir: /home/rapids/notebooks
   user: "0:0"
   volumes:
-    - ${AIRFLOW_PROJ_DIR:-../../airflow-infrastructure}/src:/home/rapids/notebooks
-    - ${AIRFLOW_PROJ_DIR:-../../airflow-infrastructure}/_tmp:/tmp
+    - ${AIRFLOW_PROJ_DIR:-../../usp-airflow-project}/src:/home/rapids/notebooks
+    - ${AIRFLOW_PROJ_DIR:-../../usp-airflow-project}/_tmp:/tmp
     - shared_data:/home/rapids/shared_data
   restart: unless-stopped
 
