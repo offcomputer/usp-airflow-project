@@ -19,7 +19,7 @@ services:
 
   minio-server:
     extends:
-      file: ./minio/docker-minio-compose.yml
+      file: ./docker/minio/docker-minio-compose.yml
       service: minio-server
     container_name: minio-server
     hostname: minio-server
@@ -28,7 +28,7 @@ services:
 
   minio-init:
     extends:
-      file: ./minio/docker-minio-compose.yml
+      file: ./docker/minio/docker-minio-compose.yml
       service: minio-init
     container_name: minio-init
     hostname: minio-init
@@ -40,7 +40,7 @@ services:
 
   postgres:
     extends:
-      file: ./postgres/docker-postgres-compose.yml
+      file: ./docker/postgres/docker-postgres-compose.yml
       service: postgres
     container_name: postgres
     hostname: postgres
@@ -49,7 +49,7 @@ services:
 
   postgres-exporter:
     extends:
-      file: ./exporters/docker-exporters-compose.yml
+      file: ./docker/exporters/docker-exporters-compose.yml
       service: postgres-exporter
     container_name: postgres-exporter
     hostname: postgres-exporter
@@ -61,7 +61,7 @@ services:
 
   redis-airflow-exporter:
     extends:
-      file: ./exporters/docker-exporters-compose.yml
+      file: ./docker/exporters/docker-exporters-compose.yml
       service: redis-airflow-exporter
     container_name: redis-airflow-exporter
     hostname: redis-airflow-exporter
@@ -73,7 +73,7 @@ services:
 
   redis-app-exporter:
     extends:
-      file: ./exporters/docker-exporters-compose.yml
+      file: ./docker/exporters/docker-exporters-compose.yml
       service: redis-app-exporter
     container_name: redis-app-exporter
     hostname: redis-app-exporter
@@ -85,7 +85,7 @@ services:
 
   redis-airflow:
     extends:
-      file: ./redis/docker-redis-compose.yml
+      file: ./docker/redis/docker-redis-compose.yml
       service: redis-airflow
     container_name: redis-airflow
     hostname: redis-airflow
@@ -94,7 +94,7 @@ services:
 
   redis-app:
     extends:
-      file: ./redis/docker-redis-compose.yml
+      file: ./docker/redis/docker-redis-compose.yml
       service: redis-app
     container_name: redis-app
     hostname: redis-app
@@ -103,7 +103,7 @@ services:
 
   airflow-init:
     extends:
-      file: ./airflow/docker-airflow-compose.yml
+      file: ./docker/airflow/docker-airflow-compose.yml
       service: airflow-init
     container_name: airflow-init
     hostname: airflow-init
@@ -117,7 +117,7 @@ services:
 
   airflow-server:
     extends:
-      file: ./airflow/docker-airflow-compose.yml
+      file: ./docker/airflow/docker-airflow-compose.yml
       service: airflow-server
     container_name: airflow-server
     hostname: airflow-server
@@ -129,7 +129,7 @@ services:
 
   airflow-scheduler:
     extends:
-      file: ./airflow/docker-airflow-compose.yml
+      file: ./docker/airflow/docker-airflow-compose.yml
       service: airflow-scheduler
     container_name: airflow-scheduler
     hostname: airflow-scheduler
@@ -141,7 +141,7 @@ services:
 
   airflow-worker:
     extends:
-      file: ./airflow/docker-airflow-compose.yml
+      file: ./docker/airflow/docker-airflow-compose.yml
       service: airflow-worker
     container_name: airflow-worker
     hostname: airflow-worker
@@ -155,7 +155,7 @@ services:
 
   airflow-triggerer:
     extends:
-      file: ./airflow/docker-airflow-compose.yml
+      file: ./docker/airflow/docker-airflow-compose.yml
       service: airflow-triggerer
     container_name: airflow-triggerer
     hostname: airflow-triggerer
@@ -167,7 +167,7 @@ services:
 
   airflow-dags:
     extends:
-      file: ./airflow/docker-airflow-compose.yml
+      file: ./docker/airflow/docker-airflow-compose.yml
       service: airflow-dags
     container_name: airflow-dags
     hostname: airflow-dags
@@ -179,7 +179,7 @@ services:
   
   flower-server:
     extends:
-      file: ./airflow/docker-airflow-compose.yml
+      file: ./docker/airflow/docker-airflow-compose.yml
       service: flower-server
     container_name: flower-server
     hostname: flower-server
@@ -191,7 +191,7 @@ services:
   
   mlflow-server:
     extends:
-      file: ./mlflow/docker-mlflow-compose.yml
+      file: ./docker/mlflow/docker-mlflow-compose.yml
       service: mlflow-server
     container_name: mlflow-server
     hostname: mlflow-server
@@ -205,7 +205,7 @@ services:
 
   grafana-server:
     extends:
-      file: ./grafana/docker-grafana-compose.yml
+      file: ./docker/grafana/docker-grafana-compose.yml
       service: grafana-server
     container_name: grafana-server
     hostname: grafana-server
@@ -214,7 +214,7 @@ services:
 
   loki-server:
     extends:
-      file: ./grafana/docker-grafana-compose.yml
+      file: ./docker/grafana/docker-grafana-compose.yml
       service: loki-server
     container_name: loki-server
     hostname: loki-server
@@ -223,7 +223,7 @@ services:
 
   promtail:
     extends:
-      file: ./grafana/docker-grafana-compose.yml
+      file: ./docker/grafana/docker-grafana-compose.yml
       service: promtail
     container_name: promtail
     hostname: promtail
@@ -232,7 +232,7 @@ services:
   
   prometheus-server:
     extends:
-      file: ./prometheus/docker-prometheus-compose.yml
+      file: ./docker/prometheus/docker-prometheus-compose.yml
       service: prometheus-server
     container_name: prometheus-server
     hostname: prometheus-server
@@ -241,7 +241,7 @@ services:
 
   prometheus-statsd:
     extends:
-      file: ./prometheus/docker-prometheus-compose.yml
+      file: ./docker/prometheus/docker-prometheus-compose.yml
       service: prometheus-statsd
     container_name: prometheus-statsd
     hostname: prometheus-statsd
@@ -250,7 +250,7 @@ services:
 
   qdrant:
     extends:
-      file: ./qdrant/docker-qdrant-compose.yml
+      file: ./docker/qdrant/docker-qdrant-compose.yml
       service: qdrant
     container_name: qdrant
     hostname: qdrant
@@ -259,7 +259,7 @@ services:
 
   rapids-notebook:
     extends:
-      file: ./rapids/docker-rapids-compose.yml
+      file: ./docker/rapids/docker-rapids-compose.yml
       service: rapids-notebook
     container_name: rapids-notebook
     hostname: rapids-notebook

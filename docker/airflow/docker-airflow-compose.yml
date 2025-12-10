@@ -25,7 +25,7 @@
 
 x-airflow-env: &airflow-env
   # Custom configurations
-  AIRFLOW_PROJ_DIR: ${AIRFLOW_PROJ_DIR:-../../usp-airflow-project}
+  AIRFLOW_PROJ_DIR: ${AIRFLOW_PROJ_DIR}
   AIRFLOW_UID: ${AIRFLOW_UID:-1000}
   ENV_FILE_PATH: $AIRFLOW_PROJ_DIR/.env
   AIRFLOW_IMAGE_NAME: ${AIRFLOW_IMAGE_NAME:-apache/airflow:latest}
@@ -63,10 +63,10 @@ x-airflow-common: &airflow-common
     - /var/run/docker.sock:/var/run/docker.sock
     - airflow_logs:/opt/airflow/logs
     - shared_data:/opt/airflow/shared_data
-    - ${AIRFLOW_PROJ_DIR:-../../usp-airflow-project}/airflow/dags:/opt/airflow/dags
-    - ${AIRFLOW_PROJ_DIR:-../../usp-airflow-project}/airflow/config:/opt/airflow/config
-    - ${AIRFLOW_PROJ_DIR:-../../usp-airflow-project}/airflow/plugins:/opt/airflow/plugins
-    - ${SRC_DIR:-../../usp-airflow-project}/src:/opt/airflow/src
+    - ${AIRFLOW_PROJ_DIR}/docker/airflow/dags:/opt/airflow/dags
+    - ${AIRFLOW_PROJ_DIR}/docker/airflow/config:/opt/airflow/config
+    - ${AIRFLOW_PROJ_DIR}/docker/airflow/plugins:/opt/airflow/plugins
+    - ${AIRFLOW_PROJ_DIR}/src:/opt/airflow/src
   user: "${AIRFLOW_UID:-1000}:0"
   group_add:
     - "${DOCKER_GID:-984}"
@@ -139,7 +139,7 @@ services:
     <<: *airflow-common
     environment:
       <<: *airflow-env
-      SRC_DIR: ${AIRFLOW_PROJ_DIR:-../../usp-airflow-project}/src
+      SRC_DIR: ${AIRFLOW_PROJ_DIR}/src
       PYTHONPATH: ${PYTHONPATH:-/opt/airflow/dags:/opt/airflow/src}
       # Required to handle warm shutdown of the celery workers properly
       # See https://airflow.apache.org/docs/docker-stack/entrypoint.html#signal-propagation
