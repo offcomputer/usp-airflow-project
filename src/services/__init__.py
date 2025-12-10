@@ -1,2 +1,2 @@
-from .minio import MinIOObjectClient, MinIOObjectRepo
+from .minio import MinIOObjectClient
 
