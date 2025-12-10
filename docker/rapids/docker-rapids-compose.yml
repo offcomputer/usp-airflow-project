@@ -37,7 +37,7 @@ x-rapids-common: &rapids-common
   user: "0:0"
   volumes:
     - ${AIRFLOW_PROJ_DIR}/src:/home/rapids/notebooks
-    - ${AIRFLOW_PROJ_DIR}/_tmp:/tmp
+    - ${AIRFLOW_PROJ_DIR}/tmp:/tmp
     - shared_data:/home/rapids/shared_data
   restart: unless-stopped
 
