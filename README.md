@@ -8,7 +8,7 @@ USP-ESALQ TCC codebase branch: [tcc-original-code-reference](https://github.com/
 
 ---
 
-## Follow‑On Research
+## Follow‑On MLOps Research
 
 The follow‑on research on the `main` branch extends the original ETL focus into a fully instrumented, cloud‑agnostic MLOps sandbox. The `docker-stack-compose.yml` file stitches together per‑service compose files under a single `core` network with shared volumes (`shared_data`, `airflow_logs`, `postgres_data`, `minio_data`, etc.) so you can spin up everything with one command. In production, design this network as a segregated, security-hardened segment. Key pieces:
 
