@@ -1,0 +1,27 @@
+x-postgres-exporter-env: &postgres-exporter-env
+  DATA_SOURCE_URI: postgres:5432/postgres?sslmode=disable
+  DATA_SOURCE_USER: ${POSTGRES_EXPORTER_USER:-pgmon}
+  DATA_SOURCE_PASS: ${POSTGRES_EXPORTER_PASSWORD:-pgmon}
+  PG_EXPORTER_DISABLE_SETTINGS_METRICS: "true"
+
+services:
+
+  postgres-exporter:
+    image: quay.io/prometheuscommunity/postgres-exporter:latest
+    environment:
+      <<: *postgres-exporter-env
+    restart: unless-stopped
+
+  redis-airflow-exporter:
+    image: oliver006/redis_exporter:latest
+    environment:
+      REDIS_ADDR: redis-airflow:6379
+      REDIS_EXPORTER_NAMESPACE: redis_airflow
+    restart: unless-stopped
+
+  redis-app-exporter:
+    image: oliver006/redis_exporter:latest
+    environment:
+      REDIS_ADDR: redis-app:6379
+      REDIS_EXPORTER_NAMESPACE: redis_app
+    restart: unless-stopped

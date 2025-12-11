@@ -1,0 +1,192 @@
+# Licensed to the Apache Software Foundation (ASF) under one
+# or more contributor license agreements.  See the NOTICE file
+# distributed with this work for additional information
+# regarding copyright ownership.  The ASF licenses this file
+# to you under the Apache License, Version 2.0 (the
+# "License"); you may not use this file except in compliance
+# with the License.  You may obtain a copy of the License at
+#
+#   http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing,
+# software distributed under the License is distributed on an
+# "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+# KIND, either express or implied.  See the License for the
+# specific language governing permissions and limitations
+# under the License.
+#
+# Modified version of the Basic Airflow cluster configuration 
+# for CeleryExecutor with Redis and PostgreSQL.
+# Original source: 
+# https://airflow.apache.org/docs/apache-airflow/3.1.3/docker-compose.yaml
+#
+# ATTENTION: This file contains default configuration for dev that can be
+# overwritten via environment variables or .env file for test/prod.
+
+x-airflow-env: &airflow-env
+  # Custom configurations
+  AIRFLOW_PROJ_DIR: ${AIRFLOW_PROJ_DIR}
+  AIRFLOW_UID: ${AIRFLOW_UID:-1000}
+  ENV_FILE_PATH: $AIRFLOW_PROJ_DIR/.env
+  AIRFLOW_IMAGE_NAME: ${AIRFLOW_IMAGE_NAME:-apache/airflow:latest}
+  AIRFLOW_SERVER_HOST: ${AIRFLOW_SERVER_HOST:-http://localhost}
+  AIRFLOW_SERVER_PORT: ${AIRFLOW_SERVER_PORT:-8080}
+  AIRFLOW_FLOWER_SERVER_PORT: ${AIRFLOW_FLOWER_SERVER_PORT:-5555}
+  # Airflow parsed configurations
+  AIRFLOW_CONN_POSTGRES_AIRFLOW: postgresql+psycopg2://${POSTGRES_USER:-airflow}:${POSTGRES_PASSWORD:-airflow}@postgres:5432/${POSTGRES_DB:-airflow}
+  AIRFLOW_CONN_POSTGRES_MLFLOW: postgresql+psycopg2://${POSTGRES_USER:-airflow}:${POSTGRES_PASSWORD:-airflow}@postgres:5432/${POSTGRES_MLFLOW_DB:-mlflow}
+  AIRFLOW_CONN_REDIS_AIRFLOW: redis://redis-airflow:6379/0
+  AIRFLOW_CONN_REDIS_APP: redis://redis-app:6379/0
+  AIRFLOW_CONN_MINIO_S3: aws://${MINIO_ROOT_USER:-minioadmin}:${MINIO_ROOT_PASSWORD:-minioadmin}@?region_name=us-east-1&endpoint_url=http%3A%2F%2Fminio-server%3A9000
+  AIRFLOW_CONN_MLFLOW_TRACKING: http://mlflow-server:5000
+  AIRFLOW_CONN_QDRANT_DB: http://qdrant:6333
+  # Native Airflow configurations
+  AIRFLOW_CONFIG: /opt/airflow/config/airflow.cfg
+  AIRFLOW_HOME: /opt/airflow
+  AIRFLOW__API__SECRET_KEY: ${AIRFLOW__API__SECRET_KEY:-Sfy+N/kY0UKhzCBREaGl9g==}
+  AIRFLOW__CORE__FERNET_KEY: ${AIRFLOW__CORE__FERNET_KEY:-nZvTzQnN9gP0sVd8pK2B7H7LkZ4iT4cDeFZyP8Y0g7Y=}
+  AIRFLOW__API_AUTH__JWT_SECRET: ${AIRFLOW__API_AUTH__JWT_SECRET:-fjMBuxy8HlbbxOCdTxMPEQ==}
+  AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: ${AIRFLOW__DATABASE__SQL_ALCHEMY_CONN:-postgresql+psycopg2://${POSTGRES_USER:-airflow}:${POSTGRES_PASSWORD:-airflow}@postgres:5432/${POSTGRES_DB:-airflow}}
+  AIRFLOW__CELERY__RESULT_BACKEND: ${AIRFLOW__CELERY__RESULT_BACKEND:-db+postgresql://${POSTGRES_USER:-airflow}:${POSTGRES_PASSWORD:-airflow}@postgres:5432/${POSTGRES_DB:-airflow}}
+
+x-airflow-common: &airflow-common
+  image: airflow-custom:latest
+  build:
+    context: .
+    args:
+      AIRFLOW_BASE_IMAGE: ${AIRFLOW_IMAGE_NAME:-apache/airflow:latest}
+  # env_file:
+  #   - ${ENV_FILE_PATH:-../.env}
+  environment:
+    <<: *airflow-env
+  volumes:
+    - /var/run/docker.sock:/var/run/docker.sock
+    - airflow_logs:/opt/airflow/logs
+    - shared_data:/opt/airflow/shared_data
+    - ${AIRFLOW_PROJ_DIR}/docker/airflow/dags:/opt/airflow/dags
+    - ${AIRFLOW_PROJ_DIR}/docker/airflow/config:/opt/airflow/config
+    - ${AIRFLOW_PROJ_DIR}/docker/airflow/plugins:/opt/airflow/plugins
+    - ${AIRFLOW_PROJ_DIR}/src:/opt/airflow/src
+  user: "${AIRFLOW_UID:-1000}:0"
+  group_add:
+    - "${DOCKER_GID:-984}"
+
+services:
+
+  airflow-init:
+    <<: *airflow-common
+    entrypoint: /bin/bash
+    environment:
+      <<: *airflow-env
+      _AIRFLOW_DB_MIGRATE: 'true'
+    user: "0:0"
+    command:
+      - -c
+      - |
+        echo "Creating missing opt dirs if missing..."
+        mkdir -v -p /opt/airflow/{logs,dags,plugins,config}
+        echo
+        echo "Airflow version: $(/entrypoint airflow version)"
+        echo
+        echo "Files in shared volumes:"
+        ls -la /opt/airflow/{logs,dags,plugins,config}
+        echo
+        echo "Running airflow config list to create default config file if missing."
+        /entrypoint airflow config list >/dev/null
+        echo
+        echo "Files in shared volumes:"
+        ls -la /opt/airflow/{logs,dags,plugins,config}
+        echo
+        echo "Change ownership of files in /opt/airflow to ${AIRFLOW_UID}:0"
+        chown -R "${AIRFLOW_UID}:0" /opt/airflow/
+        echo
+        echo "Change ownership of files in shared volumes to ${AIRFLOW_UID}:0"
+        chown -v -R "${AIRFLOW_UID}:0" /opt/airflow/{logs,dags,plugins,config}
+        echo
+        echo "Files in shared volumes:"
+        ls -la /opt/airflow/{logs,dags,plugins,config}
+
+  airflow-server:
+    <<: *airflow-common
+    environment:
+      <<: *airflow-env
+      _AIRFLOW_WWW_USER_CREATE: 'true'
+      _AIRFLOW_WWW_USER_USERNAME: ${_AIRFLOW_WWW_USER_USERNAME:-airflow}
+      _AIRFLOW_WWW_USER_PASSWORD: ${_AIRFLOW_WWW_USER_PASSWORD:-airflow}
+    command: api-server
+    ports:
+      - "${AIRFLOW_SERVER_PORT:-8080}:8080"
+    healthcheck:
+      test: ["CMD-SHELL", "curl --fail $${AIRFLOW_SERVER_HOST:-http://localhost}:$${AIRFLOW_SERVER_PORT:-8080}/api/v2/version"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+    restart: unless-stopped
+
+  airflow-scheduler:
+    <<: *airflow-common
+    command: scheduler
+    healthcheck:
+      test: ["CMD-SHELL", "curl --fail http://$${HOSTNAME}:8974/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+    restart: unless-stopped
+
+  airflow-worker:
+    <<: *airflow-common
+    environment:
+      <<: *airflow-env
+      SRC_DIR: ${AIRFLOW_PROJ_DIR}/src
+      PYTHONPATH: ${PYTHONPATH:-/opt/airflow/dags:/opt/airflow/src}
+      # Required to handle warm shutdown of the celery workers properly
+      # See https://airflow.apache.org/docs/docker-stack/entrypoint.html#signal-propagation
+      DUMB_INIT_SETSID: "0"
+    command: celery worker
+    healthcheck:
+      # yamllint disable rule:line-length
+      test:
+        - "CMD-SHELL"
+        - 'celery --app airflow.providers.celery.executors.celery_executor.app inspect ping -d "celery@$${HOSTNAME}" || celery --app airflow.executors.celery_executor.app inspect ping -d "celery@$${HOSTNAME}"'
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+    restart: unless-stopped
+
+  airflow-triggerer:
+    <<: *airflow-common
+    command: triggerer
+    healthcheck:
+      test: ["CMD-SHELL", 'airflow jobs check --job-type TriggererJob --hostname "$${HOSTNAME}"']
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+    restart: unless-stopped
+
+  airflow-dags:
+    <<: *airflow-common
+    command: dag-processor
+    healthcheck:
+      test: ["CMD-SHELL", 'airflow jobs check --job-type DagProcessorJob --hostname "$${HOSTNAME}"']
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+    restart: unless-stopped
+
+  flower-server:
+    <<: *airflow-common
+    command: celery flower
+    ports:
+      - "${AIRFLOW_FLOWER_SERVER_PORT:-5555}:5555"
+    healthcheck:
+      test: ["CMD-SHELL", "curl --fail $${AIRFLOW_SERVER_HOST:-http://localhost}:$${AIRFLOW_FLOWER_SERVER_PORT:-5555}/"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+    restart: unless-stopped

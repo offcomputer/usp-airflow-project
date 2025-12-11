@@ -1,0 +1,46 @@
+x-minio-env: &minio-env
+  MINIO_ROOT_USER: ${MINIO_ROOT_USER:-minioadmin}
+  MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:-minioadmin}
+  MINIO_HOST: ${MINIO_HOST:-http://localhost}
+  MINIO_PROMETHEUS_AUTH_TYPE: ${MINIO_PROMETHEUS_AUTH_TYPE:-public}
+  
+x-minio-common: &minio-common
+  image: minio/minio:latest
+  command: server /data --console-address ":9001"
+  environment:
+    <<: *minio-env
+  ports:
+    - "${MINIO_PORT_API:-9000}:9000"
+    - "${MINIO_PORT_CONSOLE:-9001}:9001"
+  volumes:
+    - minio_data:/data
+  healthcheck:
+    test: ["CMD-SHELL", "curl -f $${MINIO_HOST:-http://localhost}:9000/minio/health/live || exit 1"]
+    interval: 30s
+    timeout: 10s
+    retries: 5
+
+services:
+
+  minio-server:
+    <<: *minio-common
+
+  minio-init:
+    image: minio/mc:latest
+    environment:
+      <<: *minio-env
+    entrypoint: /bin/sh
+    command: >
+      -c "
+      while true; do
+        if mc alias set local http://minio-server:9000 ${MINIO_ROOT_USER:-minioadmin} ${MINIO_ROOT_PASSWORD:-minioadmin}; then
+          break;
+        fi;
+        echo 'MinIO not ready, retrying...';
+        sleep 5;
+      done &&
+      mc mb -p local/airflow-logs || true &&
+      mc mb -p local/airflow-xcoms || true &&
+      mc mb -p local/mlflow-artifacts || true
+      "
+    restart: "no"

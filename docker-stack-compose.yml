@@ -1,0 +1,282 @@
+## Stack compose guidelines
+##
+## This file is the stack entrypoint that wires together
+## independently defined service compose files.
+##
+## For each service, this file SHOULD ONLY define:
+##   - extends.file    → path to the service compose file
+##   - extends.service → name of the service in that file
+##   - container_name  → explicit container name
+##   - hostname        → hostname on the shared network
+##   - depends_on      → cross-service dependencies
+##   - networks        → which shared networks the service joins
+##
+## All other service configuration (image, ports, volumes,
+## environment, healthchecks, commands, etc.) MUST live in the
+## referenced compose file, not here.
+
+services:
+
+  minio-server:
+    extends:
+      file: ./docker/minio/docker-minio-compose.yml
+      service: minio-server
+    container_name: minio-server
+    hostname: minio-server
+    networks:
+      - core
+
+  minio-init:
+    extends:
+      file: ./docker/minio/docker-minio-compose.yml
+      service: minio-init
+    container_name: minio-init
+    hostname: minio-init
+    depends_on:
+      minio-server:
+        condition: service_healthy
+    networks:
+      - core
+
+  postgres:
+    extends:
+      file: ./docker/postgres/docker-postgres-compose.yml
+      service: postgres
+    container_name: postgres
+    hostname: postgres
+    networks:
+      - core
+
+  postgres-exporter:
+    extends:
+      file: ./docker/exporters/docker-exporters-compose.yml
+      service: postgres-exporter
+    container_name: postgres-exporter
+    hostname: postgres-exporter
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - core
+
+  redis-airflow-exporter:
+    extends:
+      file: ./docker/exporters/docker-exporters-compose.yml
+      service: redis-airflow-exporter
+    container_name: redis-airflow-exporter
+    hostname: redis-airflow-exporter
+    depends_on:
+      redis-airflow:
+        condition: service_started
+    networks:
+      - core
+
+  redis-app-exporter:
+    extends:
+      file: ./docker/exporters/docker-exporters-compose.yml
+      service: redis-app-exporter
+    container_name: redis-app-exporter
+    hostname: redis-app-exporter
+    depends_on:
+      redis-app:
+        condition: service_started
+    networks:
+      - core
+
+  redis-airflow:
+    extends:
+      file: ./docker/redis/docker-redis-compose.yml
+      service: redis-airflow
+    container_name: redis-airflow
+    hostname: redis-airflow
+    networks:
+      - core
+
+  redis-app:
+    extends:
+      file: ./docker/redis/docker-redis-compose.yml
+      service: redis-app
+    container_name: redis-app
+    hostname: redis-app
+    networks:
+      - core
+
+  airflow-init:
+    extends:
+      file: ./docker/airflow/docker-airflow-compose.yml
+      service: airflow-init
+    container_name: airflow-init
+    hostname: airflow-init
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis-airflow:
+        condition: service_healthy
+    networks:
+      - core
+
+  airflow-server:
+    extends:
+      file: ./docker/airflow/docker-airflow-compose.yml
+      service: airflow-server
+    container_name: airflow-server
+    hostname: airflow-server
+    depends_on:
+      airflow-init:
+        condition: service_completed_successfully
+    networks:
+      - core
+
+  airflow-scheduler:
+    extends:
+      file: ./docker/airflow/docker-airflow-compose.yml
+      service: airflow-scheduler
+    container_name: airflow-scheduler
+    hostname: airflow-scheduler
+    depends_on:
+      airflow-init:
+        condition: service_completed_successfully
+    networks:
+      - core
+
+  airflow-worker:
+    extends:
+      file: ./docker/airflow/docker-airflow-compose.yml
+      service: airflow-worker
+    container_name: airflow-worker
+    hostname: airflow-worker
+    depends_on:
+      airflow-init:
+        condition: service_completed_successfully
+      airflow-server:
+        condition: service_healthy
+    networks:
+      - core
+
+  airflow-triggerer:
+    extends:
+      file: ./docker/airflow/docker-airflow-compose.yml
+      service: airflow-triggerer
+    container_name: airflow-triggerer
+    hostname: airflow-triggerer
+    depends_on:
+      airflow-init:
+        condition: service_completed_successfully
+    networks:
+      - core
+
+  airflow-dags:
+    extends:
+      file: ./docker/airflow/docker-airflow-compose.yml
+      service: airflow-dags
+    container_name: airflow-dags
+    hostname: airflow-dags
+    depends_on:
+      airflow-init:
+        condition: service_completed_successfully
+    networks:
+      - core
+  
+  flower-server:
+    extends:
+      file: ./docker/airflow/docker-airflow-compose.yml
+      service: flower-server
+    container_name: flower-server
+    hostname: flower-server
+    depends_on:
+      airflow-init:
+        condition: service_completed_successfully
+    networks:
+      - core
+  
+  mlflow-server:
+    extends:
+      file: ./docker/mlflow/docker-mlflow-compose.yml
+      service: mlflow-server
+    container_name: mlflow-server
+    hostname: mlflow-server
+    depends_on:
+      postgres:
+        condition: service_healthy
+      minio-server:
+        condition: service_healthy
+    networks:
+      - core
+
+  grafana-server:
+    extends:
+      file: ./docker/grafana/docker-grafana-compose.yml
+      service: grafana-server
+    container_name: grafana-server
+    hostname: grafana-server
+    networks:
+      - core
+
+  loki-server:
+    extends:
+      file: ./docker/grafana/docker-grafana-compose.yml
+      service: loki-server
+    container_name: loki-server
+    hostname: loki-server
+    networks:
+      - core
+
+  promtail:
+    extends:
+      file: ./docker/grafana/docker-grafana-compose.yml
+      service: promtail
+    container_name: promtail
+    hostname: promtail
+    networks:
+      - core
+  
+  prometheus-server:
+    extends:
+      file: ./docker/prometheus/docker-prometheus-compose.yml
+      service: prometheus-server
+    container_name: prometheus-server
+    hostname: prometheus-server
+    networks:
+      - core
+
+  prometheus-statsd:
+    extends:
+      file: ./docker/prometheus/docker-prometheus-compose.yml
+      service: prometheus-statsd
+    container_name: prometheus-statsd
+    hostname: prometheus-statsd
+    networks:
+      - core
+
+  qdrant:
+    extends:
+      file: ./docker/qdrant/docker-qdrant-compose.yml
+      service: qdrant
+    container_name: qdrant
+    hostname: qdrant
+    networks:
+      - core
+
+  rapids-notebook:
+    extends:
+      file: ./docker/rapids/docker-rapids-compose.yml
+      service: rapids-notebook
+    container_name: rapids-notebook
+    hostname: rapids-notebook
+    networks:
+      - core
+
+networks:
+  core:
+
+volumes:
+  shared_data:
+  postgres_data:
+  redis_app_data:
+  redis_airflow_data:
+  minio_data:
+  airflow_logs:
+  prometheus_data:
+  qdrant_data:
+  loki_data:
+  promtail_data:

@@ -1,0 +1,90 @@
+x-redis-airflow-env: &redis-airflow-env
+  REDIS_AIRFLOW_SAVE: ${REDIS_AIRFLOW_SAVE:-""}
+  REDIS_AIRFLOW_APPENDONLY: ${REDIS_AIRFLOW_APPENDONLY:-no}
+  REDIS_AIRFLOW_MAXMEMORY: ${REDIS_AIRFLOW_MAXMEMORY:-256mb}
+  REDIS_AIRFLOW_MAXMEMORY_POLICY: ${REDIS_AIRFLOW_MAXMEMORY_POLICY:-allkeys-lru}
+  REDIS_AIRFLOW_PROTECTED_MODE: ${REDIS_AIRFLOW_PROTECTED_MODE:-no}
+  REDIS_AIRFLOW_IO_THREADS: ${REDIS_AIRFLOW_IO_THREADS:-2}
+  REDIS_AIRFLOW_IO_THREADS_DO_READS: ${REDIS_AIRFLOW_IO_THREADS_DO_READS:-yes}
+  REDIS_AIRFLOW_LOGLEVEL: ${REDIS_AIRFLOW_LOGLEVEL:-notice}
+  REDIS_AIRFLOW_TCP_KEEPALIVE: ${REDIS_AIRFLOW_TCP_KEEPALIVE:-60}
+  REDIS_AIRFLOW_HZ: ${REDIS_AIRFLOW_HZ:-10}
+
+x-redis-app-env: &redis-app-env
+  REDIS_APP_SAVE: ${REDIS_APP_SAVE:-900 1 300 10 60 10000}
+  REDIS_APP_APPENDONLY: ${REDIS_APP_APPENDONLY:-yes}
+  REDIS_APP_APPENDFSYNC: ${REDIS_APP_APPENDFSYNC:-everysec}
+  REDIS_APP_MAXMEMORY: ${REDIS_APP_MAXMEMORY:-0} # 0 = sem limite
+  REDIS_APP_MAXMEMORY_POLICY: ${REDIS_APP_MAXMEMORY_POLICY:-noeviction}
+  REDIS_APP_PROTECTED_MODE: ${REDIS_APP_PROTECTED_MODE:-no}
+  REDIS_APP_IO_THREADS: ${REDIS_APP_IO_THREADS:-2}
+  REDIS_APP_IO_THREADS_DO_READS: ${REDIS_APP_IO_THREADS_DO_READS:-yes}
+  REDIS_APP_LOGLEVEL: ${REDIS_APP_LOGLEVEL:-notice}
+  REDIS_APP_TCP_KEEPALIVE: ${REDIS_APP_TCP_KEEPALIVE:-60}
+  REDIS_APP_HZ: ${REDIS_APP_HZ:-10}
+
+x-redis-airflow-common: &redis-airflow-common
+  image: redis:latest
+  environment:
+    <<: *redis-airflow-env
+  command: >
+    sh -c "redis-server
+        --save \"${REDIS_AIRFLOW_SAVE}\"
+        --appendonly \"${REDIS_AIRFLOW_APPENDONLY}\"
+        --maxmemory \"${REDIS_AIRFLOW_MAXMEMORY}\"
+        --maxmemory-policy \"${REDIS_AIRFLOW_MAXMEMORY_POLICY}\"
+        --protected-mode \"${REDIS_AIRFLOW_PROTECTED_MODE}\"
+        --io-threads \"${REDIS_AIRFLOW_IO_THREADS}\"
+        --io-threads-do-reads \"${REDIS_AIRFLOW_IO_THREADS_DO_READS}\"
+        --loglevel \"${REDIS_AIRFLOW_LOGLEVEL}\"
+        --tcp-keepalive \"${REDIS_AIRFLOW_TCP_KEEPALIVE}\"
+        --hz \"${REDIS_AIRFLOW_HZ}\""
+  expose:
+    - 6379
+  healthcheck:
+    test: ["CMD", "redis-cli", "ping"]
+    interval: 10s
+    timeout: 30s
+    retries: 50
+    start_period: 30s
+  restart: unless-stopped
+  volumes:
+    - redis_airflow_data:/data
+  
+x-redis-app-common: &redis-app-common
+  image: redis:latest
+  environment:
+    <<: *redis-app-env
+  command: >
+    sh -c "redis-server
+        --save \"${REDIS_APP_SAVE}\"
+        --appendonly \"${REDIS_APP_APPENDONLY}\"
+        --appendfsync \"${REDIS_APP_APPENDFSYNC}\"
+        --maxmemory \"${REDIS_APP_MAXMEMORY}\"
+        --maxmemory-policy \"${REDIS_APP_MAXMEMORY_POLICY}\"
+        --protected-mode \"${REDIS_APP_PROTECTED_MODE}\"
+        --io-threads \"${REDIS_APP_IO_THREADS}\"
+        --io-threads-do-reads \"${REDIS_APP_IO_THREADS_DO_READS}\"
+        --loglevel \"${REDIS_APP_LOGLEVEL}\"
+        --tcp-keepalive \"${REDIS_APP_TCP_KEEPALIVE}\"
+        --hz \"${REDIS_APP_HZ}\"
+        --dir /data"
+  expose:
+    - 6379
+  healthcheck:
+    test: ["CMD", "redis-cli", "ping"]
+    interval: 10s
+    timeout: 30s
+    retries: 50
+    start_period: 30s
+  restart: unless-stopped
+  volumes:
+    - redis_app_data:/data
+
+services:
+
+  redis-airflow:
+    <<: *redis-airflow-common
+
+  redis-app:
+    <<: *redis-app-common

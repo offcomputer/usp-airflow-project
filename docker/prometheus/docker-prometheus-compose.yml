@@ -1,0 +1,24 @@
+x-prometheus-common: &prometheus-common
+  image: prom/prometheus:latest
+  restart: unless-stopped
+  command:
+    - "--config.file=/etc/prometheus/prometheus.yml"
+    - "--storage.tsdb.path=/prometheus"
+    - "--web.enable-lifecycle"
+  ports:
+    - "${PROMETHEUS_PORT:-9090}:9090"
+  volumes:
+    - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
+    - prometheus_data:/prometheus
+
+services:
+
+  prometheus-server:
+    <<: *prometheus-common
+
+  prometheus-statsd:
+    image: prom/statsd-exporter:latest
+    restart: unless-stopped
+    command:
+      - '--statsd.listen-udp=:9125'
+      - '--web.listen-address=:9102'

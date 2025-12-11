@@ -1,0 +1,26 @@
+x-mlflow-env: &mlflow-env
+  MLFLOW_PORT: ${MLFLOW_PORT:-5000}
+  MLFLOW_BACKEND_STORE_URI: postgresql+psycopg2://${POSTGRES_USER:-airflow}:${POSTGRES_PASSWORD:-airflow}@postgres/${POSTGRES_DB:-airflow}
+  MLFLOW_ARTIFACT_ROOT: s3://mlflow-artifacts/
+  AWS_ACCESS_KEY_ID: ${MINIO_ROOT_USER:-minioadmin}
+  AWS_SECRET_ACCESS_KEY: ${MINIO_ROOT_PASSWORD:-minioadmin}
+  MLFLOW_S3_ENDPOINT_URL: http://minio-server:9000
+
+x-mlflow-common: &mlflow-common
+  image: ghcr.io/mlflow/mlflow:latest
+  environment:
+    <<: *mlflow-env
+  command: >
+    mlflow server
+    --host 0.0.0.0
+    --port 5000
+    --backend-store-uri ${MLFLOW_BACKEND_STORE_URI}
+    --default-artifact-root ${MLFLOW_ARTIFACT_ROOT}
+  ports:
+    - "${MLFLOW_PORT:-5000}:5000"
+
+services:
+
+  mlflow-server:
+    <<: *mlflow-common
+    restart: unless-stopped
