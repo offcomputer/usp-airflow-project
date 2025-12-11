@@ -1,6 +1,6 @@
 # `usp-airflow-project`
 
-This repository contains the codebase developed as part of a research project exploring the design and evaluation of **parallelized ETL (Extract, Transform, Load) pipelines** using Apache Airflow. It investigates how Airflow DAGs can be structured to support modularity, scalability, and high throughput in workflows, especially in environments with heavy computational demands.
+This branch contains the codebase developed as part of a research project exploring the design and evaluation of **parallelized ETL (Extract, Transform, Load) pipelines** using Apache Airflow. It investigates how Airflow DAGs can be structured to support modularity, scalability, and high throughput in workflows, especially in environments with heavy computational demands.
 
 ---
 
