@@ -8,7 +8,7 @@ USP-ESALQ TCC codebase branch: [tcc-original-code-reference](https://github.com/
 
 ---
 
-## Follow‑On MLOps Research
+## Follow‑On MLOps Research `main` branch
 
 ![MLOps Architecture Diagram](docs/img/ddd-mlops-architecture.png)
 
