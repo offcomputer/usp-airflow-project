@@ -1,18 +1,18 @@
 # Custom Airflow image with preinstalled Python dependencies
-ARG AIRFLOW_BASE_IMAGE=apache/airflow:latest
+ARG AIRFLOW_BASE_IMAGE=apache/airflow:3.1.3
 FROM ${AIRFLOW_BASE_IMAGE}
 
 # Mirror the additional requirements used in compose, but bake them in so runtime
 # doesn't try to install via _PIP_ADDITIONAL_REQUIREMENTS.
 ARG EXTRA_PIP=" \
-    apache-airflow-providers-amazon[s3fs] \
-    pytest \
-    pytest-cov \
-    mlflow \
-    qdrant-client \
-    pyspark \
-    ipython \
-    ipykernel \
+    apache-airflow-providers-amazon[s3fs]==9.16.0 \
+    pytest==9.0.2 \
+    pytest-cov==7.0.0 \
+    mlflow==3.7.0 \
+    qdrant-client==1.16.2 \
+    pyspark==4.0.1 \
+    ipython==9.8.0 \
+    ipykernel==7.1.0 \
     "
 
 USER root
