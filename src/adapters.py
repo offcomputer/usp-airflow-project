@@ -13,3 +13,4 @@ OLTPDatabaseClient = services.PostgresDBClient
 VectorDatabaseClient = services.QdrantDBClient
 ModelsRegistryClient = services.MlflowClient
 MessageBrokerClient = services.RedisClient
+ComputeClient = services.PySparkClient
