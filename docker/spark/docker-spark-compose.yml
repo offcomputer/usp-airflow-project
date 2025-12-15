@@ -1,0 +1,28 @@
+x-spark-env: &spark-env
+  SPARK_UI_PORT: ${SPARK_UI_PORT:-4040}
+  SPARK_MASTER_PORT: ${SPARK_MASTER_PORT:-7077}
+  AIRFLOW_PROJ_DIR: ${AIRFLOW_PROJ_DIR}
+
+x-spark-common: &spark-common
+  build:
+    context: .
+  environment:
+    <<: *spark-env
+  command: >
+    /bin/bash -c "/opt/spark/sbin/start-master.sh &&
+    /opt/spark/sbin/start-worker.sh spark://spark:${SPARK_MASTER_PORT:-7077} &&
+    tail -f /dev/null"
+  ports:
+    - "${SPARK_UI_PORT:-4040}:4040"
+    - "${SPARK_MASTER_PORT:-7077}:7077"
+  volumes:
+    - ${AIRFLOW_PROJ_DIR}/src:/opt/spark/work-dir/src
+    - ${AIRFLOW_PROJ_DIR}/tmp:/opt/spark/work-dir/tmp
+    - shared_data:/opt/spark/work-dir/shared_data
+  working_dir: /opt/spark/work-dir
+  restart: unless-stopped
+
+services:
+
+  spark:
+    <<: *spark-common

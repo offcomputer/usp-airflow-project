@@ -40,6 +40,7 @@ x-airflow-env: &airflow-env
   AIRFLOW_CONN_MINIO_S3: aws://${MINIO_ROOT_USER:-minioadmin}:${MINIO_ROOT_PASSWORD:-minioadmin}@?region_name=us-east-1&endpoint_url=http%3A%2F%2Fminio-server%3A9000
   AIRFLOW_CONN_MLFLOW_TRACKING: http://mlflow-server:5000
   AIRFLOW_CONN_QDRANT_DB: http://qdrant:6333
+  AIRFLOW_CONN_SPARK_DEFAULT: spark://spark:7077
   # Native Airflow configurations
   AIRFLOW_CONFIG: /opt/airflow/config/airflow.cfg
   AIRFLOW_HOME: /opt/airflow
@@ -53,8 +54,6 @@ x-airflow-common: &airflow-common
   image: airflow-custom:latest
   build:
     context: .
-    args:
-      AIRFLOW_BASE_IMAGE: ${AIRFLOW_IMAGE_NAME:-apache/airflow:latest}
   # env_file:
   #   - ${ENV_FILE_PATH:-../.env}
   environment:

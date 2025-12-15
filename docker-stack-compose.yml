@@ -266,6 +266,15 @@ services:
     networks:
       - core
 
+  spark:
+    extends:
+      file: ./docker/spark/docker-spark-compose.yml
+      service: spark
+    container_name: spark
+    hostname: spark
+    networks:
+      - core
+
 networks:
   core:
 
