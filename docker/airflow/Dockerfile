@@ -6,6 +6,8 @@ FROM ${AIRFLOW_BASE_IMAGE}
 # doesn't try to install via _PIP_ADDITIONAL_REQUIREMENTS.
 ARG EXTRA_PIP=" \
     apache-airflow-providers-amazon[s3fs]==9.16.0 \
+    apache-airflow-providers-apache-spark \
+    apache-airflow-providers-daskexecutor \
     pytest==9.0.2 \
     pytest-cov==7.0.0 \
     mlflow==3.7.0 \
