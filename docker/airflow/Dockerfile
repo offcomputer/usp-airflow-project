@@ -1,5 +1,5 @@
 # Custom Airflow image with preinstalled Python dependencies
-FROM apache/airflow:3.1.3
+FROM apache/airflow:latest
 
 # Mirror the additional requirements used in compose, but bake them in so runtime
 # doesn't try to install via _PIP_ADDITIONAL_REQUIREMENTS.

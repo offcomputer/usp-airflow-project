@@ -6,8 +6,8 @@ from airflow.providers.standard.operators.bash import BashOperator
 
 RAPIDS_SVC = "rapids-notebook"  # container name from docker-rapids-compose.yml
 # Notebooks live under src/notebooks/recsys; src is mounted to /home/rapids/notebooks
-BASE_NB = "/home/rapids/notebooks/notebooks/recsys"
-OUT_DIR = "/home/rapids/shared_data/recsys_runs"
+BASE_NB = "/home/rapids/notebooks/tests/integration_tests/cuda_notebooks"
+OUT_DIR = "/home/rapids/shared_data/tests/cuda_notebooks"
 
 default_args = {"owner": "data-eng", "retries": 0}
 
@@ -24,26 +24,26 @@ def pm_cmd(nb_filename: str, params: dict | None = None) -> str:
 
 
 with DAG(
-    dag_id="recsys_notebooks_on_running_rapids",
+    dag_id="test_cuda_rapids_environment",
     start_date=datetime(2024, 1, 1),
     schedule=None,
     catchup=False,
     default_args=default_args,
-    tags=["recsys", "rapids", "papermill"],
+    tags=["recsys", "rapids", "papermill", "cuda"],
 ) as dag:
     n01 = BashOperator(
-        task_id="run_01_files_evaluation",
-        bash_command=pm_cmd("01_files_evaluation.ipynb", {"run_ts": "{{ ts }}"}),
+        task_id="cudf_test",
+        bash_command=pm_cmd("cudf_test.ipynb", {"run_ts": "{{ ts }}"}),
     )
 
     n02 = BashOperator(
-        task_id="run_02_eda",
-        bash_command=pm_cmd("02_eda.ipynb", {"run_ts": "{{ ts }}"}),
+        task_id="daskdf_test",
+        bash_command=pm_cmd("daskdf_test.ipynb", {"run_ts": "{{ ts }}"}),
     )
 
     n03 = BashOperator(
-        task_id="run_03_feature_engineering",
-        bash_command=pm_cmd("03_feature_engineering.ipynb"),
+        task_id="pytorch_test",
+        bash_command=pm_cmd("pytorch_test.ipynb", {"run_ts": "{{ ts }}"}),
     )
 
     n01 >> n02 >> n03
