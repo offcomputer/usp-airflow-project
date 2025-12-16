@@ -19,12 +19,12 @@ def pull_json(**context):
 
 
 with DAG(
-    dag_id="example_xcom_json",
+    dag_id="test_s3_xcom_json",
     start_date=datetime(2024, 1, 1),
     schedule=None,
     catchup=False,
     default_args=default_args,
-    tags=["example", "xcom"],
+    tags=["test", "xcom", "s3", "json"],
 ) as dag:
     push = PythonOperator(
         task_id="push_json",

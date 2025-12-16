@@ -12,10 +12,12 @@ from airflow.operators.empty import EmptyOperator
 
 
 with DAG(
-    dag_id="observability_architecture",
+    dag_id="diagram_observability_architecture",
     start_date=datetime(2024, 1, 1),
     schedule=None,
     catchup=False,
+    tags=["documentation", "observability", "monitoring", 
+          "logging", "metrics", "diagram"],
     doc_md=r"""
 ### Observability topology
 Metrics: services → exporters/StatsD → Prometheus → Grafana  

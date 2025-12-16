@@ -29,7 +29,7 @@ with DAG(
     schedule=None,
     catchup=False,
     default_args=default_args,
-    tags=["recsys", "rapids", "papermill", "cuda"],
+    tags=["test", "rapids", "papermill", "cuda", "pytorch", "cudf", "dask"],
 ) as dag:
     n01 = BashOperator(
         task_id="cudf_test",
