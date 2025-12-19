@@ -50,14 +50,6 @@ class ObjectRepoCRUDInterface(ABC):
         """Delete an item from the repository."""
         raise NotImplementedError
 
-    @abstractmethod
-    def list(self, *, 
-             limit: Optional[int] = None, 
-             offset: int = 0
-             ) -> Iterable[Mapping[str, Any]]:
-        """List items in the repository with optional pagination."""
-        raise NotImplementedError
-
 
 class ObjectRepoReportsInterface(ABC):
     """Abstract interface for read-only reporting-style operations on a 
