@@ -61,7 +61,7 @@ x-airflow-common: &airflow-common
   volumes:
     - /var/run/docker.sock:/var/run/docker.sock
     - airflow_logs:/opt/airflow/logs
-    - shared_data:/opt/airflow/shared_data
+    - ${AIRFLOW_PROJ_DIR}/tmp:/tmp
     - ${AIRFLOW_PROJ_DIR}/docker/airflow/dags:/opt/airflow/dags
     - ${AIRFLOW_PROJ_DIR}/docker/airflow/config:/opt/airflow/config
     - ${AIRFLOW_PROJ_DIR}/docker/airflow/plugins:/opt/airflow/plugins

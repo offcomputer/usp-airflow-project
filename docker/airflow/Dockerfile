@@ -14,6 +14,7 @@ ARG EXTRA_PIP=" \
     pyspark==4.0.1 \
     ipython==9.8.0 \
     ipykernel==7.1.0 \
+    camelot-py==1.0.9 \
     "
 
 USER root

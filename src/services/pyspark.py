@@ -1,5 +1,5 @@
 from typing import Any, Dict, Optional
-from airflow.hooks.base import BaseHook
+from airflow.sdk.bases.hook import BaseHook
 from interfaces.clients import ServiceClientInterface
 from pyspark.sql import SparkSession
 

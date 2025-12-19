@@ -1,6 +1,6 @@
 from typing import Any
 import mlflow
-from airflow.hooks.base import BaseHook
+from airflow.sdk.bases.hook import BaseHook
 from interfaces.clients import ServiceClientInterface
 
 

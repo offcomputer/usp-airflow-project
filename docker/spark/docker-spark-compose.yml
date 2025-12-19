@@ -18,7 +18,6 @@ x-spark-common: &spark-common
   volumes:
     - ${AIRFLOW_PROJ_DIR}/src:/opt/spark/work-dir/src
     - ${AIRFLOW_PROJ_DIR}/tmp:/opt/spark/work-dir/tmp
-    - shared_data:/opt/spark/work-dir/shared_data
   working_dir: /opt/spark/work-dir
   restart: unless-stopped
 

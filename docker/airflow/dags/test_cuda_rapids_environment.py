@@ -7,7 +7,7 @@ from airflow.providers.standard.operators.bash import BashOperator
 RAPIDS_SVC = "rapids-notebook"  # container name from docker-rapids-compose.yml
 # Notebooks live under src/notebooks/recsys; src is mounted to /home/rapids/notebooks
 BASE_NB = "/home/rapids/notebooks/tests/integration_tests/cuda_notebooks"
-OUT_DIR = "/home/rapids/shared_data/tests/cuda_notebooks"
+OUT_DIR = "/tmp/tests/cuda_notebooks"
 
 default_args = {"owner": "data-eng", "retries": 0}
 

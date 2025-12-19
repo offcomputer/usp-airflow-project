@@ -12,7 +12,7 @@ USP-ESALQ TCC codebase branch: [tcc-original-code-reference](https://github.com/
 
 ![MLOps Architecture Diagram](docs/img/ddd-mlops-architecture.png)
 
-The follow‑on research on the `main` branch extends the original ETL focus into a fully instrumented, cloud‑agnostic MLOps sandbox. The `docker-stack-compose.yml` file stitches together per‑service compose files under a single `core` network with shared volumes (`shared_data`, `airflow_logs`, `postgres_data`, `minio_data`, etc.) so you can spin up everything with one command. In production, design this network as a segregated, security-hardened segment. Key pieces:
+The follow‑on research on the `main` branch extends the original ETL focus into a fully instrumented, cloud‑agnostic MLOps sandbox. The `docker-stack-compose.yml` file stitches together per‑service compose files under a single `core` network with shared volumes (`airflow_logs`, `postgres_data`, `minio_data`, etc.) so you can spin up everything with one command. In production, design this network as a segregated, security-hardened segment. Key pieces:
 
 - **Airflow Celery cluster** (`docker/airflow/`): custom image with S3 provider, MLflow, Qdrant client, pytest baked in; services for web/API, scheduler, workers, triggerer, DAG processor, and Flower. Prewired connections to Postgres, Redis, MinIO (S3), MLflow, and Qdrant. Mounts project `src`, DAGs, config, plugins, logs.
 - **State layer**: Postgres with tunable buffers/init scripts (`docker/postgres/`), two Redis instances (one for Airflow broker/result, one for app caching) with separate configs (`docker/redis/`).

@@ -279,7 +279,6 @@ networks:
   core:
 
 volumes:
-  shared_data:
   postgres_data:
   redis_app_data:
   redis_airflow_data:

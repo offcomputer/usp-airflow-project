@@ -1,6 +1,6 @@
 from typing import Any
 
-from airflow.hooks.base import BaseHook
+from airflow.sdk.bases.hook import BaseHook
 from interfaces.clients import ServiceClientInterface
 from qdrant_client import QdrantClient
 
