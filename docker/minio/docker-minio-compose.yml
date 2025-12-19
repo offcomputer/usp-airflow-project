@@ -41,6 +41,7 @@ services:
       done &&
       mc mb -p local/airflow-logs || true &&
       mc mb -p local/airflow-xcoms || true &&
-      mc mb -p local/mlflow-artifacts || true
+      mc mb -p local/mlflow-artifacts || true &&
+      mc mb -p local/tests || true
       "
     restart: "no"
